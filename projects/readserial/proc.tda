@@ -1,0 +1,137 @@
+// @lang=tda @ts=2
+
+module read_properties(clk, reset_n, rxd, data, valid, state_s, data_i, cnt_s, cnt_en);
+
+input logic clk;
+input logic reset_n;
+input logic rxd;
+input logic [7:0] data;
+input logic valid;
+input logic state_s;
+input logic [7:0] data_i;
+input logic [2:0] cnt_s;
+input logic cnt_en;
+
+// sequence definition for SVA property
+parameter IDLE = 1'b0;
+parameter READDATA = 1'b1;
+`define true 1
+
+// property assumption1;
+//   IR[8:6] != 3'b000;
+// endproperty
+
+`include "tidal.sv"
+
+
+
+`begin_tda(ops)
+
+// sequence definition for TiDAL property
+sequence reset_sequence;
+	reset_n == 1'b0;
+endsequence;
+// your operational properties
+property reset;
+	reset_sequence |=>
+  t##0 state_s == IDLE and
+	t##0 valid == 1'b0;
+endproperty
+
+property stay_in_idle;
+    t##0 state_s == IDLE and
+    t##0 rxd == 1
+  implies
+    //t##1 cnt_s == 0 and
+    t##1 valid == 0 and
+    t##1 state_s == IDLE;
+endproperty
+
+property read_byte;
+logic transfer_value1;
+logic[1:0] transfer_value2;
+logic[2:0] transfer_value3;
+logic[3:0] transfer_value4;
+logic[4:0] transfer_value5;
+logic[5:0] transfer_value6;
+logic[6:0] transfer_value7;
+logic[7:0] transfer_value8;
+	t##0 rxd == 0 and
+	t##0 state_s == IDLE and
+	//t##0 in_idle_counter_is_0 and
+	//t##0 in_idle_counter_not_enabled and
+	//t##1 state_s == READ and										//Had to add this as the state didn't change when the data stream started.
+	t##1 set_freeze(transfer_value1, rxd) and
+	t##2 set_freeze(transfer_value2, {transfer_value1, rxd}) and
+	t##3 set_freeze(transfer_value3, {transfer_value2, rxd}) and
+	t##4 set_freeze(transfer_value4, {transfer_value3, rxd}) and
+	t##5 set_freeze(transfer_value5, {transfer_value4, rxd}) and
+	t##6 set_freeze(transfer_value6, {transfer_value5, rxd}) and
+	t##7 set_freeze(transfer_value7, {transfer_value6, rxd}) and
+	t##8 set_freeze(transfer_value8, {transfer_value7, rxd}) 
+	implies
+	t##1 valid == 0 and
+	t##2 valid == 0 and
+	t##3 valid == 0 and
+	t##4 valid == 0 and
+	t##5 valid == 0 and
+	t##6 valid == 0 and
+	t##7 valid == 0 and
+	t##9 data == transfer_value8 and
+	t##9 $rose(valid) and
+  t##9 state_s == IDLE;
+endproperty
+
+
+sequence in_idle_counter_is_0;
+	state_s == READDATA or
+	cnt_s == 0;
+endsequence
+
+sequence in_idle_counter_not_enabled;
+	state_s == IDLE and
+	cnt_en == 0;
+endsequence
+
+property in_idle_counter_not_enabled__step;
+	t##0 in_idle_counter_not_enabled and
+	t##1 state_s == IDLE
+	implies
+	t##1 in_idle_counter_not_enabled;
+endproperty
+
+property in_idle_counter_not_enabled__base;
+	t##0 reset_sequence
+	implies
+	t##1 in_idle_counter_not_enabled;
+endproperty
+
+property in_idle_counter_is_0__step;
+	t##0 in_idle_counter_is_0 and
+	t##1 in_idle_counter_is_0
+	implies
+	t##2 in_idle_counter_is_0;
+endproperty
+
+property in_idle_counter_is_0__base;
+	t##0 reset_sequence
+	implies
+	t##1 in_idle_counter_is_0;
+endproperty
+
+
+a_reset: assert property(@(posedge clk) reset);
+a_stay_in_idle: assert property(@(posedge clk) disable iff(reset_n==0) stay_in_idle);
+a_read_byte: assert property(@(posedge clk) disable iff(reset_n==0) read_byte);
+a_idle_step: assert property(@(posedge clk) disable iff(reset_n==0) in_idle_counter_not_enabled__step);
+a_idle_base: assert property(@(posedge clk) in_idle_counter_not_enabled__base);
+a_counter_base: assert property(@(posedge clk) in_idle_counter_is_0__base);
+a_counter_step: assert property(@(posedge clk) disable iff(reset_n==0) in_idle_counter_is_0__step);
+`end_tda
+//assert_assumption1: assert property(@(posedge clk) disable iff(reset==1) assumption1);
+
+
+endmodule
+
+// your bind statement
+bind readserial read_properties inst_readserial_properties(.*);
