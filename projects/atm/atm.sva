@@ -1,0 +1,40 @@
+// @lang=sva @ts=2
+
+module atm_property_suite(clk, error_i, multiple_i, correct_o, dismiss_o);
+
+input logic clk;
+input logic error_i, multiple_i;
+input logic correct_o, dismiss_o;
+
+// sequence definitions
+
+// property definitions
+property behavior1;
+	correct_o || dismiss_o |-> dismiss_o != correct_o;
+endproperty
+
+property behavior2;
+	!error_i |-> !correct_o && !dismiss_o;
+endproperty
+
+property behavior3;
+	multiple_i && error_i|-> dismiss_o;
+endproperty
+
+property behavior4;
+	error_i ##0 $past(!error_i) ##0 !multiple_i ##0 $past(!multiple_i) implies correct_o;
+endproperty
+
+property behavior5;
+	error_i ##0 $past(error_i) implies dismiss_o;
+endproperty
+// make assertion on properties to be checked
+a_behavior1: assert property (@(posedge clk) behavior1);
+a_behavior2: assert property (@(posedge clk) behavior2);
+a_behavior3: assert property (@(posedge clk) behavior3);
+a_behavior4: assert property (@(posedge clk) behavior4);
+a_behavior5: assert property (@(posedge clk) behavior5);
+endmodule
+
+// bind the verification IP to the design
+bind atm atm_property_suite inst_jkff_property_suite(.*);

@@ -1,0 +1,63 @@
+// @lang=sva @ts=2
+
+module arbiter_property_suite(clk,reset,request_i,grant_o,free_i,state_s);
+
+input logic clk;
+input logic reset;
+input logic [1:0] request_i;
+input logic [1:0] grant_o;
+input logic free_i;
+input logic state_s;
+
+parameter IDLE = 1'b0;
+parameter BUSY = 1'b1;
+
+// sequence definition
+assume property ( @(posedge clk) assumedProperty);
+assume property ( @(posedge clk) assumedProperty2);
+//assume property ( @(posedge clk) assumedProperty3);
+sequence seq1;
+state_s == IDLE ##0 free_i;
+endsequence;
+
+property behavior1;
+  reset implies grant_o == 2'b00;
+endproperty;
+
+property assumedProperty;
+  $fell(reset) |-> free_i;
+endproperty;
+
+property assumedProperty2;
+  state_s==BUSY && !free_i |-> request_i == 2'b00;
+endproperty;
+
+property behavior2;
+  //$fell(reset) implies ##0 grant_o == 2'b01;
+  $fell(reset) ##0 &request_i ##1 !reset |-> grant_o === 2'b01;
+endproperty;
+// property definition
+
+property behavior3;
+  !request_i implies ##1 !grant_o;
+endproperty;
+
+property behavior4;
+  seq1 ##0 $onehot(request_i) implies ##2 state_s === IDLE;
+endproperty;
+
+property behavior5;
+//compare the grant_o value from the current request and the previous request 2 cycles ago.
+	seq1 ##0 request_i == 2'b11 ##2 seq1 ##0 request_i == 2'b11 |=> grant_o != $past(grant_o, 2);
+endproperty;
+
+a_behavior1: assert property (@(posedge clk) behavior1);
+a_behavior2: assert property (@(posedge clk) behavior2);
+a_behavior3: assert property (@(posedge clk) behavior3);
+a_behavior4: assert property (@(posedge clk) disable iff(reset) behavior4);
+a_behavior5: assert property (@(posedge clk) disable iff(reset) behavior5);
+// assert, assume statement
+endmodule
+
+// bind statement
+bind arbiter arbiter_property_suite inst_arbiter_property_suite(.*);
