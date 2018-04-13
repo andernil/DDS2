@@ -1,0 +1,92 @@
+# vsim -assertdebug -c -voptargs="+acc" test_hdlc bind_hdlc -do "
+# 
+# log -r *
+# 
+# run -all; exit
+# " 
+# Start time: 12:27:49 on Apr 13,2018
+# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# //  Questa Sim-64
+# //  Version 10.5c linux_x86_64 Jul 20 2016
+# //
+# //  Copyright 1991-2016 Mentor Graphics Corporation
+# //  All Rights Reserved.
+# //
+# //  QuestaSim and its associated documentation contain trade
+# //  secrets and commercial or financial information that are the property of
+# //  Mentor Graphics Corporation and are privileged, confidential,
+# //  and exempt from disclosure under the Freedom of Information Act,
+# //  5 U.S.C. Section 552. Furthermore, this information
+# //  is prohibited from disclosure under the Trade Secrets Act,
+# //  18 U.S.C. Section 1905.
+# //
+# Loading sv_std.std
+# Loading work.test_hdlc(fast)
+# Loading work.in_hddataset restart -f
+# vsim:/test_hdlc/u_dut
+g work.AddressIF(fast)
+# Loading work.TxController(fast)
+# Loading work.TxBuff(fast)
+# Loading work.TxFCS(fast)
+# Loading work.TxChannel(fast)
+# Loading work.RxController(fast)
+# Loading work.RxBuff(fast)
+# Loading work.RxFCS(fast)
+# Loading work.RxChannel(fast)
+# Loading work.testPr_hdlc(fast)
+# Loading work.assertions_hdlc(fast)
+# Loading work.bind_hdlc(fast)
+# 
+# log -r *
+# run -all
+# *************************************************************
+#                    0 - Starting Test Program
+# *************************************************************
+# PASS: Full buffer, Tx_Full is high
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 644750 ns Started: 644750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 648250 ns Started: 648250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# ** Error: No 0 inserted after 5 consecutive ones
+#    Time: 775250 ns Started: 775250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 775250 ns Started: 775250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 inserted after 5 consecutive ones
+#    Time: 900250 ns Started: 900250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 900250 ns Started: 900250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 inserted after 5 consecutive ones
+#    Time: 904250 ns Started: 904250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 904250 ns Started: 904250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 inserted after 5 consecutive ones
+#    Time: 1032750 ns Started: 1032750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 1032750 ns Started: 1032750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 1150250 ns Started: 1150250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 1154750 ns Started: 1154750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# ** Error: No 0 removed after 5 consecutive ones
+#    Time: 1167250 ns Started: 1167250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# Tx_SC=00000001
+# *************************************************************
+#              1380250 - Finishing Test Program
+# *************************************************************
+# ** Note: $stop    : testPr_hdlc.sv(43)
+#    Time: 1380250 ns  Iteration: 1  Instance: /test_hdlc/u_testPr
+# Break in Module testPr_hdlc at testPr_hdlc.sv line 43
+# Stopped at testPr_hdlc.sv line 43
+#  exit
+# *********************************
+# *                               *
+# * 	Assertion Errors: 13	  *
+# *                               *
+# *********************************
+# End time: 12:27:52 on Apr 13,2018, Elapsed time: 0:00:03
+# Errors: 13, Warnings: 0
