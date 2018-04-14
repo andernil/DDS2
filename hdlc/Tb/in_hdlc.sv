@@ -45,8 +45,11 @@ interface in_hdlc ();
   logic       Rx_FlagDetect;
   logic       Rx_Drop;
   logic       Rx_AbortSignal;
+  logic       Rx_ValidFrame;
   logic       Rx_FrameError;
   logic       [7:0] Rx_Data;
+  logic       Rx_EoF;
+  logic       Rx_Overflow;
 
 
 

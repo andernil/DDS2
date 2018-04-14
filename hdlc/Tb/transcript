@@ -4,7 +4,7 @@
 # 
 # run -all; exit
 # " 
-# Start time: 12:27:49 on Apr 13,2018
+# Start time: 18:17:53 on Apr 14,2018
 # ** Note: (vsim-3813) Design is being optimized due to module recompilation...
 # //  Questa Sim-64
 # //  Version 10.5c linux_x86_64 Jul 20 2016
@@ -22,9 +22,9 @@
 # //
 # Loading sv_std.std
 # Loading work.test_hdlc(fast)
-# Loading work.in_hddataset restart -f
-# vsim:/test_hdlc/u_dut
-g work.AddressIF(fast)
+# Loading work.in_hdlc(fast)
+# Loading work.Hdlc(fast)
+# Loading work.AddressIF(fast)
 # Loading work.TxController(fast)
 # Loading work.TxBuff(fast)
 # Loading work.TxFCS(fast)
@@ -42,51 +42,471 @@ g work.AddressIF(fast)
 # *************************************************************
 #                    0 - Starting Test Program
 # *************************************************************
-# PASS: Full buffer, Tx_Full is high
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 644750 ns Started: 644750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 648250 ns Started: 648250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
+# Random test           1
+#  55 bytes of data written to TX_BUFF
 # PASS: Start and end frame inserted properly
 # PASS: Receive_FlagDetect
-# ** Error: No 0 inserted after 5 consecutive ones
-#    Time: 775250 ns Started: 775250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 775250 ns Started: 775250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 inserted after 5 consecutive ones
-#    Time: 900250 ns Started: 900250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 900250 ns Started: 900250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 inserted after 5 consecutive ones
-#    Time: 904250 ns Started: 904250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 904250 ns Started: 904250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 inserted after 5 consecutive ones
-#    Time: 1032750 ns Started: 1032750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Insert_Assert File: assertions_hdlc.sv Line: 143 Expr: Tx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 1032750 ns Started: 1032750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
 # PASS: Entire buffer red for transmission, Tx_Done is high
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 1150250 ns Started: 1150250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 1154750 ns Started: 1154750 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
-# ** Error: No 0 removed after 5 consecutive ones
-#    Time: 1167250 ns Started: 1167250 ns  Scope: test_hdlc.u_assertion_bind.Verify6_Remove_Assert File: assertions_hdlc.sv Line: 147 Expr: Rx_Data==?X
 # PASS: Start and end frame inserted properly
 # PASS: Receive_FlagDetect
-# Tx_SC=00000001
+# PASS: Rx_Ready cdataset restart -f
+# vsim:/test_hdlc/u_dut
+to be read
+# PASS: RX status OK
+# Random test           2
+#  36 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           3
+#  94 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           4
+#  18 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           5
+#  35 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           6
+#  11 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           7
+#  29 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           8
+#  14 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test           9
+# 105 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          10
+#  79 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          11
+#   3 bytes of data written to TX_BUFF
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          12
+#  91 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          13
+#  87 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          14
+#  67 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          15
+#  88 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          16
+#  54 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          17
+#  80 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          18
+# 114 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          19
+#  69 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          20
+# 109 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          21
+#  70 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          22
+#  35 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          23
+# 119 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          24
+#  21 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: correct_data_rxBuff_Error
+# PASS: RX status OK
+# Frame error at:             27012750
+# Random test          25
+# 104 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          26
+#   5 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          27
+#  39 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          28
+#  87 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          29
+#  86 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          30
+# 121 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          31
+# 121 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          32
+#  31 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          33
+#  94 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          34
+#  53 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          35
+# 115 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          36
+#  27 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          37
+#  85 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          38
+#  92 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          39
+# 106 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          40
+#  26 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          41
+# 119 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          42
+#  21 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          43
+# 106 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          44
+# 105 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          45
+# 100 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          46
+#  97 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          47
+#  98 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          48
+#   5 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          49
+# 106 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
+# Random test          50
+#  28 bytes of data written to TX_BUFF
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Entire buffer red for transmission, Tx_Done is high
+# PASS: Start and end frame inserted properly
+# PASS: Receive_FlagDetect
+# PASS: Rx_Ready correctly indicates that Rx buffer is ready to be read
+# PASS: RX status OK
 # *************************************************************
-#              1380250 - Finishing Test Program
+#             58510750 - Finishing Test Program
 # *************************************************************
-# ** Note: $stop    : testPr_hdlc.sv(43)
-#    Time: 1380250 ns  Iteration: 1  Instance: /test_hdlc/u_testPr
-# Break in Module testPr_hdlc at testPr_hdlc.sv line 43
-# Stopped at testPr_hdlc.sv line 43
+# ** Note: $stop    : testPr_hdlc.sv(66)
+#    Time: 58510750 ns  Iteration: 1  Instance: /test_hdlc/u_testPr
+# Break in Module testPr_hdlc at testPr_hdlc.sv line 66
+# Stopped at testPr_hdlc.sv line 66
 #  exit
 # *********************************
 # *                               *
-# * 	Assertion Errors: 13	  *
+# * 	Assertion Errors: 0	  *
 # *                               *
 # *********************************
-# End time: 12:27:52 on Apr 13,2018, Elapsed time: 0:00:03
-# Errors: 13, Warnings: 0
+# End time: 18:17:56 on Apr 14,2018, Elapsed time: 0:00:03
+# Errors: 0, Warnings: 0

@@ -17,7 +17,26 @@ program testPr_hdlc(
 //   endtask
 // endclass: data_hdlc;
   int TbErrorCnt;
-  
+  parameter TX_SC   = 3'b000;
+  parameter TX_BUFF = 3'b001;
+  parameter RX_SC   = 3'b010;
+  parameter RX_BUFF = 3'b011;
+  parameter RX_LEN  = 3'b100;
+
+  parameter TX_DONE         = 8'b0000_0001;
+  parameter TX_ENABLE       = 8'b0000_0010;
+  parameter TX_ABORTFRAME   = 8'b0000_0100;
+  parameter TX_ABORTEDTRANS = 8'b0000_1000;
+  parameter TX_FULL         = 8'b0001_0000;
+
+  parameter RX_READY        = 8'b0000_0001;
+  parameter RX_DROP         = 8'b0000_0010;
+  parameter RX_FRAMEERROR   = 8'b0000_0100;
+  parameter RX_ABORTSIGNAL  = 8'b0000_1000;
+  parameter RX_OVERFLOW     = 8'b0001_0000;
+  parameter RX_FCSEN        = 8'b0010_0000;
+
+  int num_loops = 50;
 
 
 
@@ -36,7 +55,11 @@ program testPr_hdlc(
     //Verification17();
     //Verification9();
     //Verification6();
-    Verification8();
+//    Verification8();
+    for(int loop = 0; loop < num_loops; loop++) begin
+        $display("Random test %d", loop+1);
+        random_input();
+    end
     $display("*************************************************************");
     $display("%t - Finishing Test Program", $time);
     $display("*************************************************************");
@@ -71,7 +94,9 @@ program testPr_hdlc(
     uin_hdlc.Address     = Address;
     uin_hdlc.WriteEnable = 1'b1;
     uin_hdlc.DataIn      = Data;
+    uin_hdlc.Rx          = uin_hdlc.Tx; //Added to keep transfering Tx to Rx during write.
     @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx          = uin_hdlc.Tx; //Added to keep transfering Tx to Rx during write.
     uin_hdlc.WriteEnable = 1'b0;
   endtask
 
@@ -120,6 +145,9 @@ program testPr_hdlc(
     $display("Rx_SC=%h", ReadData);
 
   endtask
+    
+  
+
 
   task Verification9();
   logic [7:0] writeData;
@@ -129,7 +157,7 @@ program testPr_hdlc(
   dataIn = 8'b10101010;
   writeData = 8'b00000100;
   for(int i = 0; i < 126; i=i+1) begin
-    WriteAddress(3'b001, dataIn);
+    WriteAddress(TX_BUFF, dataIn);
   end
   WriteAddress(3'b000, transmitData);
   WriteAddress(3'b000, 8'b0000000);
@@ -205,7 +233,7 @@ program testPr_hdlc(
 
   endtask
 
- task Verification8();
+ task Verification8();      //Used for generating increasing data_in and aborting at a certain point in time, if desired.
     // data_hdlc inputValue;
     logic [7:0] readData;
     logic [7:0] dataIn;
@@ -215,19 +243,49 @@ program testPr_hdlc(
     transmitData = 8'b0000010;
     receiveData = 8'b0000010;
     for(int i = 0; i < 126; i=i+1) begin
-      WriteAddress(3'b001, i);                  //Write the data to register 1
+      WriteAddress(TX_BUFF, 255);                  //Write the data to register 1
 		end
-    WriteAddress(3'b000, transmitData);         //Start transfer
+    WriteAddress(TX_SC, transmitData);         //Start transfer
     for(int i = 0; i < 2500; i=i+1) begin
+       /* if(i==1500) begin
+            transmitData = 8'b00000100;
+            WriteAddress(3'b000, transmitData);
+        end*/
         @(posedge uin_hdlc.Clk);
         uin_hdlc.Rx = uin_hdlc.Tx;
       //#20;
-		end
+	end
     @(posedge uin_hdlc.Clk);
     @(posedge uin_hdlc.Clk);
     @(posedge uin_hdlc.Clk);
-    ReadAddress(3'b000, readData);
-    $display("Tx_SC=%b", readData);
+    ReadAddress(RX_SC, readData);
+    $display("Rx_SC=%b", readData);
+
+  endtask
+
+  task random_input();
+    automatic logic[7:0] Data = '0;
+    logic [7:0] size;
+
+    size = $urandom_range(1, 126); 
+    //Generate random data and write it to TX_buffer
+    for (int i = 0; i < size; i++) begin
+        Data = $urandom();
+        WriteAddress(TX_BUFF, Data);
+    end
+    $display("%d bytes of data written to TX_BUFF", size);
+    //Initiate transfer
+    WriteAddress(TX_SC, TX_ENABLE);  
+    for(int i = 0; i < 2200; i=i+1) begin
+       /* if(i==1500) begin
+            transmitData = 8'b00000100;
+            WriteAddress(3'b000, transmitData);
+        end*/
+        @(posedge uin_hdlc.Clk);
+        uin_hdlc.Rx = uin_hdlc.Tx;
+      //#20;
+	end
+    
 
   endtask
 

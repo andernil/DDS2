@@ -12,7 +12,9 @@ module test_hdlc ();
   //Internal assignments
   assign uin_hdlc.Rx_FlagDetect      = u_dut.Rx_FlagDetect;
   assign uin_hdlc.Rx_Drop            = u_dut.Rx_Drop;
+  assign uin_hdlc.Rx_EoF            = u_dut.Rx_EoF;
   assign uin_hdlc.Rx_AbortSignal     = u_dut.Rx_AbortSignal;
+  assign uin_hdlc.Rx_Overflow       =   u_dut.Rx_Overflow;
   assign uin_hdlc.Rx_FrameError      = u_dut.Rx_FrameError;
   assign uin_hdlc.Tx_DataAvail       = u_dut.Tx_DataAvail;
   assign uin_hdlc.Tx_Full           = u_dut.Tx_Full;
