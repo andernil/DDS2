@@ -18,11 +18,15 @@ module assertions_hdlc (
   input logic WriteEnable,
   input logic ReadEnable,
   input logic[7:0] Rx_Data,
+  input logic Rx_RdBuff,
   input logic Rx_Drop,
   input logic Rx_AbortSignal,
+  input logic Rx_NewByte,
   input logic Rx_FrameError,
   input logic Rx_ValidFrame,
   input logic Rx_Overflow,
+  input logic Rx_StartFCS,
+  input logic[7:0] Rx_FrameSize,
   input logic Tx,
   input logic Tx_NewByte,
   input logic Tx_DataAvail,
@@ -92,15 +96,15 @@ module assertions_hdlc (
   endproperty
 
   property Verify3; //Correct bits set in Rx status/control-register after receiving frame
-    @(posedge Clk) disable iff (!Rst) $fell(Rx_EoF) |-> 
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_EoF) |-> 
     if(Rx_AbortSignal)
-        (##4 !Rx_Overflow ##0 Rx_AbortSignal ##0 !Rx_FrameError ##0 !Rx_Ready, $display("Aborted frame at: ",$time))
+        (##0 !Rx_Overflow ##0 Rx_AbortSignal ##0 !Rx_FrameError ##0 !Rx_Ready, $display("Aborted frame at: ",$time))
     else if (Rx_Overflow)
-        (##4 Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 !Rx_Ready, $display("Overflow at: ",$time))
+        (##0 Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 Rx_Ready, $display("Overflow at: ",$time))
     else if (Rx_FrameError)
-        (##4 !Rx_Overflow ##0 !Rx_AbortSignal ##0 Rx_FrameError ##0 !Rx_Ready, $display("Frame error at: ",$time))
+        (##0 !Rx_Overflow ##0 !Rx_AbortSignal ##0 Rx_FrameError ##0 !Rx_Ready, $display("Frame error at: ",$time))
     else
-        ##4 !Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 Rx_Ready;
+        ##0 !Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 Rx_Ready;
   endproperty
 
 
@@ -139,16 +143,32 @@ module assertions_hdlc (
     @(posedge Clk) disable iff (!Rst) $stable(Rx_ValidFrame) ##0 $rose(Rx_AbortSignal) |-> prev_abort;
   endproperty
 
+  property verify12; //Check that Rx_EoF is generated when a whole frame has been received
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_FlagDetect) ##8 $rose(Rx_ValidFrame) ##[1:$] $fell(Rx_ValidFrame) |-> !Rx_EoF ##1 Rx_EoF ##1 !Rx_EoF;
+  endproperty
+
+  property verify13; //Rx_Overflow is asserted when receiving more than 128 bytes of data, [->x] = consecutive sequence
+    @(posedge Clk) disable iff (!Rst || Rx_EoF) $fell(Rx_StartFCS) ##6 (Rx_NewByte)[->129] |=> Rx_Overflow;
+  endproperty
+
+  property verify14; //Check that Rx_FrameSize is equal to the number of bytes received during the frame
+  int bytecount = 0;
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_ValidFrame) ##0 (##[7:9]$rose(Rx_NewByte),bytecount++)[*1:127] ##4 Rx_EoF |-> ##5 Rx_FrameSize == (bytecount-2);
+  endproperty
+
   property verify15; //Rx_Ready should indicate bytes in RX buffer are ready to be read
-    @(posedge Clk) disable iff (!Rst) $rose(Rx_Ready) ##1 Rx_Ready |-> $fell(Rx_EoF);//$past(Rx_EoF) ##0 !Rx_EoF; 
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_Ready) ##1 Rx_Ready |-> $fell(Rx_EoF);
   endproperty  
 
-  property verify17;
+  property verify15; //Rx_Ready should indicate bytes in RX buffer are ready to be read
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_Ready) ##1 Rx_Ready |-> $fell(Rx_EoF);
+  endproperty  
+
+  property verify17; //Tx_Done should be asserted when the entire TX buffer has been read for transmission
     @(posedge Clk) disable iff (!Rst) $fell(Tx_DataAvail) |-> $past(Tx_Done, 1);
   endproperty
 
-
-  property verify18;
+  property verify18; //Tx_Full should be asserted after writing 126 or more bytes to Tx buffer
     @(posedge Clk) disable iff (!Rst) $rose(Tx_Enable) ##2 Tx_FrameSize == 8'd126 |-> $past(Tx_Full, 2);
   endproperty
 
@@ -166,7 +186,7 @@ correct_data_rxBuff_Abort_Assert    :  assert property (correct_data_rxBuff_Abor
                                   else begin $error("Wrong data in rx buffer after Abort");
 ErrCntAssertions++; end
 
-Verify3_assert: 	assert property (Verify3) $display("PASS: RX status OK");
+Verify3_assert: 	assert property (Verify3)  $display("PASS: RX status OK");
 				                else begin $error("Fail: RX status not OK after transfer");
 ErrCntAssertions++; end
 
@@ -196,6 +216,18 @@ ErrCntAssertions++; end
 
 verify10_Assert    :  assert property (verify10) $display("PASS: Abort sequence recognised correctly");
                                   else begin $error("Abort sequence not recognised correctly");
+ErrCntAssertions++; end
+
+verify12_Assert    :  assert property (verify12) $display("PASS: Rx_EoF generated correctly");
+                                  else begin $error("Rx_EoF not generated properly");
+ErrCntAssertions++; end
+
+verify13_Assert    :  assert property (verify13) $display("PASS: Rx_Overflow asserted correctly");
+                                  else begin $error("Rx_Overflow not asserted after 128 bytes of data");
+ErrCntAssertions++; end
+
+verify14_Assert    :  assert property (verify14) $display("PASS: Framesize match");
+                                  else begin $error("Framesize doesn't match");
 ErrCntAssertions++; end
 
 correct_data_rxBuff_Abort_Error    :  assert property (correct_data_rxBuff_Error) $display("PASS: correct_data_rxBuff_Error");

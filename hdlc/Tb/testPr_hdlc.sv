@@ -36,8 +36,11 @@ program testPr_hdlc(
   parameter RX_OVERFLOW     = 8'b0001_0000;
   parameter RX_FCSEN        = 8'b0010_0000;
 
-  int num_loops = 50;
+  parameter FLAG  = 8'b0111_1110;
+  parameter ABORT = 8'b0111_1111;
 
+  int num_loops = 5;       //Number of times the random test should loop
+    
 
 
   initial begin
@@ -46,7 +49,7 @@ program testPr_hdlc(
     $display("*************************************************************");
 
     init();
-
+    //ReceiveTor();
     //Tests:
     //Receive();
     //Verification1_Drop();
@@ -55,11 +58,8 @@ program testPr_hdlc(
     //Verification17();
     //Verification9();
     //Verification6();
-//    Verification8();
-    for(int loop = 0; loop < num_loops; loop++) begin
-        $display("Random test %d", loop+1);
-        random_input();
-    end
+//    Verification8()
+    random_loop;
     $display("*************************************************************");
     $display("%t - Finishing Test Program", $time);
     $display("*************************************************************");
@@ -110,6 +110,12 @@ program testPr_hdlc(
     uin_hdlc.ReadEnable = 1'b0;
   endtask
 
+  task random_loop();
+    for(int i = 0; i < num_loops; i=i+1) begin
+        random_input();
+    end
+  endtask;
+
 
   task Receive();
     logic [7:0] ReadData;
@@ -145,9 +151,6 @@ program testPr_hdlc(
     $display("Rx_SC=%h", ReadData);
 
   endtask
-    
-  
-
 
   task Verification9();
   logic [7:0] writeData;
@@ -854,5 +857,203 @@ uin_hdlc.Rx = 1'b0;
   ReadAddress(3'b011, readData);
   $display("Rx_Data=%b", readData);
   endtask
+
+  task ReceiveTor();
+    logic [7:0] ReadData;
+    logic [7:0] ReadLen;
+  automatic logic [4:0][7:0] shortmessage = '0;
+  automatic logic [135:0][7:0] Data = '0;
+
+
+   WriteAddress(RX_SC,RX_FCSEN);
+
+/*
+	Rx_Byte(FLAG);
+	Rx_Byte(ABORT);
+*/
+	$display("%t New remove zero message ================", $time);
+    uin_hdlc.Rx = 1'b1;
+	    repeat(2)
+	      @(posedge uin_hdlc.Clk);
+	Rx_Byte(FLAG);
+
+/////////////////////////////////
+//Data
+//	Rx_Byte('h2D);
+//	Rx_Byte('h2D);
+//Checksum
+//	Rx_Byte('hDD);
+//	Rx_Byte('h4D);
+////////////////////////////////
+
+	//Data
+	Rx_Byte('h2D);
+	//7E
+    uin_hdlc.Rx = 1'b0;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b0;	//Will be removed
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b1;
+    @(posedge uin_hdlc.Clk);
+    uin_hdlc.Rx = 1'b0;
+    @(posedge uin_hdlc.Clk);
+
+	//Checksum
+	Rx_Byte('h9D);
+	Rx_Byte('h70);
+	
+	Rx_Byte(FLAG);
+    uin_hdlc.Rx = 1'b1;
+
+
+	$display("%t New remove zero message ================", $time);
+
+	shortmessage[0] = 'h71;
+	shortmessage[1] = 'h9B;
+
+	//shortmessage[0] = 8'b11111000;
+	//shortmessage[1] = 8'b01001000;
+
+
+	CalculateFCS(shortmessage, 2, {shortmessage[3],shortmessage[2]});
+    Rx_Byte(FLAG);
+    Rx_multisend(shortmessage,4);
+
+    Rx_Byte(FLAG);
+    uin_hdlc.Rx = 1'b1;
+/*
+	$display("%t New Overflow message ================", $time);
+
+  for (int i = 0; i < 134; i++) begin
+  	Data[i] = $urandom();
+  end
+   Rx_Byte(FLAG);
+   Rx_multisend(Data,130);
+   Rx_Byte(FLAG);
+
+*/
+
+  //Loop for reciving lots of valid random data
+  for (int i = 0; i < num_loops; i++) begin
+	    $display("%t New random message ================", $time);
+
+	    Rx_Random();
+	    uin_hdlc.Rx = 1'b1;
+
+	    repeat(8)
+	      @(posedge uin_hdlc.Clk);
+
+	    ReadAddress(RX_SC, ReadData);
+	    $display("Rx_SC=%b", ReadData);
+
+
+	    ReadAddress(RX_LEN , ReadLen);
+	    $display("Rx_Len=%d", ReadLen);
+
+	  for (int i = 0; i < ReadLen; i++) begin
+   		ReadAddress(RX_BUFF , ReadData);
+	  end
+
+  end
+
+    uin_hdlc.Rx = 1'b1;
+
+    repeat(8)
+      @(posedge uin_hdlc.Clk);
+    ReadAddress(RX_SC, ReadData);
+    $display("Rx_SC=%b", ReadData);
+
+
+    ReadAddress(RX_LEN , ReadData);
+    $display("Rx_Len=%h", ReadData);
+
+    ReadAddress(RX_BUFF , ReadData);
+    $display("Rx_D =%h", ReadData);
+    ReadAddress(RX_BUFF , ReadData);
+    $display("Rx_D =%b", ReadData);
+
+    ReadAddress(RX_BUFF , ReadData);
+    $display("Rx_D =%b", ReadData);
+
+  endtask
+
+  task Rx_Byte(input logic [7:0] Data);
+  for (int i = 0; i < 8; i++) begin
+        uin_hdlc.Rx = Data[i];
+      @(posedge uin_hdlc.Clk);
+  end
+  endtask
+
+  task Rx_Random();
+  automatic logic [127:0][7:0] Data = '0;
+  logic [7:0] size;
+  logic        [15:0] FCSbytes;
+
+  size = $urandom_range(1, 140);
+
+  for (int i = 0; i < size; i++) begin
+  	Data[i] = $urandom();
+  end
+
+  CalculateFCS(Data, size, {Data[size+1],Data[size]});
+
+  size = size + 2;
+  Rx_Byte(FLAG);
+  Rx_multisend(Data,size);
+  Rx_Byte(FLAG);
+  endtask
+
+  task Rx_multisend(input logic [132:0][7:0] data,
+                       input int             size);
+    automatic logic      [4:0] zeroPadding  = '0;
+
+    for (int i = 0; i < size; i++) begin
+      for (int j = 0; j < 8; j++) begin
+        if (&zeroPadding) begin
+          uin_hdlc.Rx      = 1'b0;
+          @(posedge uin_hdlc.Clk);
+          zeroPadding      = zeroPadding >> 1;
+          zeroPadding[4]   = 0;
+        end
+        zeroPadding      = zeroPadding >> 1;
+        zeroPadding[4]   = data[i][j];
+        uin_hdlc.Rx      = data[i][j];
+        @(posedge uin_hdlc.Clk);
+      end
+    end
+  endtask
+
+  task CalculateFCS(input  logic [127:0][7:0]  data, 
+                    input  logic [7:0]         size, 
+                    output logic [15:0]        FCSbytes );
+
+    logic [23:0] tempStore;
+    tempStore[7:0]  = data[0];
+    tempStore[15:8] = data[1];
+
+    for (int i = 2; i < size + 2; i++) begin
+      tempStore[23:16] = data[i];
+      for (int j = 0; j < 8; j++) begin
+        tempStore[16] = tempStore[16] ^ tempStore[0];
+        tempStore[14] = tempStore[14] ^ tempStore[0];
+        tempStore[1]  = tempStore[1]  ^ tempStore[0];
+        tempStore[0]  = tempStore[0]  ^ tempStore[0];
+        tempStore = tempStore >> 1;
+      end
+    end
+    FCSbytes = tempStore[15:0];
+  endtask
+
+
 
 endprogram

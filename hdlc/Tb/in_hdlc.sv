@@ -43,8 +43,12 @@ interface in_hdlc ();
   logic             Tx_FCSDone;
   // Rx - internal
   logic       Rx_FlagDetect;
+  logic       Rx_StartFCS;
   logic       Rx_Drop;
+  logic       Rx_RdBuff;
   logic       Rx_AbortSignal;
+  logic       Rx_NewByte;
+  logic       [7:0] Rx_FrameSize;
   logic       Rx_ValidFrame;
   logic       Rx_FrameError;
   logic       [7:0] Rx_Data;

@@ -16,6 +16,11 @@ module test_hdlc ();
   assign uin_hdlc.Rx_AbortSignal     = u_dut.Rx_AbortSignal;
   assign uin_hdlc.Rx_Overflow       =   u_dut.Rx_Overflow;
   assign uin_hdlc.Rx_FrameError      = u_dut.Rx_FrameError;
+  assign uin_hdlc.Rx_NewByte        = u_dut.Rx_NewByte;
+  assign uin_hdlc.Rx_ValidFrame     = u_dut.Rx_ValidFrame;
+  assign uin_hdlc.Rx_StartFCS       = u_dut.Rx_StartFCS;
+  assign uin_hdlc.Rx_FrameSize           = u_dut.Rx_FrameSize;
+  assign uin_hdlc.Rx_RdBuff           = u_dut.Rx_RdBuff;
   assign uin_hdlc.Tx_DataAvail       = u_dut.Tx_DataAvail;
   assign uin_hdlc.Tx_Full           = u_dut.Tx_Full;
   assign uin_hdlc.Tx_FrameSize           = u_dut.Tx_FrameSize;
@@ -28,6 +33,7 @@ module test_hdlc ();
   assign uin_hdlc.Rx_Data           = u_dut.Rx_Data;
   assign uin_hdlc.Tx_WriteFCS       = u_dut.Tx_WriteFCS;
   assign uin_hdlc.Tx_FCSDone       = u_dut.Tx_FCSDone;
+
   //Clock
   always #250ns uin_hdlc.Clk = ~uin_hdlc.Clk;
 
