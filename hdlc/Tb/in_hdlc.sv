@@ -32,6 +32,7 @@ interface in_hdlc ();
   // Tx - internal
   logic             Tx_DataAvail;
   logic             Tx_Full;
+  logic [127:0][7:0] Tx_DataArray;
   logic       [7:0] Tx_Data;
   logic             Tx_NewByte;
   logic       [7:0] Tx_FrameSize;
@@ -46,6 +47,7 @@ interface in_hdlc ();
   logic       Rx_StartFCS;
   logic       Rx_Drop;
   logic       Rx_RdBuff;
+  logic       Rx_WrBuff;
   logic       Rx_AbortSignal;
   logic       Rx_NewByte;
   logic       [7:0] Rx_FrameSize;
@@ -54,6 +56,7 @@ interface in_hdlc ();
   logic       [7:0] Rx_Data;
   logic       Rx_EoF;
   logic       Rx_Overflow;
+  logic       RxD;
 
 
 

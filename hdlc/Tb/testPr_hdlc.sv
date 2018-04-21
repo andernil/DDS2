@@ -39,7 +39,7 @@ program testPr_hdlc(
   parameter FLAG  = 8'b0111_1110;
   parameter ABORT = 8'b0111_1111;
 
-  int num_loops = 5;       //Number of times the random test should loop
+  int num_loops = 1000;       //Number of times the random test should loop
     
 
 
@@ -58,7 +58,7 @@ program testPr_hdlc(
     //Verification17();
     //Verification9();
     //Verification6();
-//    Verification8()
+    //Verification8();
     random_loop;
     $display("*************************************************************");
     $display("%t - Finishing Test Program", $time);
@@ -245,7 +245,7 @@ program testPr_hdlc(
     dataIn = 8'b10101010;
     transmitData = 8'b0000010;
     receiveData = 8'b0000010;
-    for(int i = 0; i < 126; i=i+1) begin
+    for(int i = 0; i < 1; i=i+1) begin
       WriteAddress(TX_BUFF, 255);                  //Write the data to register 1
 		end
     WriteAddress(TX_SC, transmitData);         //Start transfer
@@ -262,7 +262,7 @@ program testPr_hdlc(
     @(posedge uin_hdlc.Clk);
     @(posedge uin_hdlc.Clk);
     ReadAddress(RX_SC, readData);
-    $display("Rx_SC=%b", readData);
+    //$display("Rx_SC=%b", readData);
 
   endtask
 
@@ -270,7 +270,7 @@ program testPr_hdlc(
     automatic logic[7:0] Data = '0;
     logic [7:0] size;
 
-    size = $urandom_range(1, 126); 
+    size = $urandom_range(3, 126); 
     //Generate random data and write it to TX_buffer
     for (int i = 0; i < size; i++) begin
         Data = $urandom();

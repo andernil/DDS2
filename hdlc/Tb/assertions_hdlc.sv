@@ -9,6 +9,7 @@ module assertions_hdlc (
   input logic Clk,
   input logic Rst,
   input logic Rx,
+  input logic RxD,
   input logic Rx_EoF,
   input logic Rx_FlagDetect,
   input logic Rx_Ready,
@@ -26,6 +27,7 @@ module assertions_hdlc (
   input logic Rx_ValidFrame,
   input logic Rx_Overflow,
   input logic Rx_StartFCS,
+  input logic Rx_WrBuff,
   input logic[7:0] Rx_FrameSize,
   input logic Tx,
   input logic Tx_NewByte,
@@ -35,6 +37,7 @@ module assertions_hdlc (
   input logic[7:0] Tx_FrameSize,
   input logic[7:0] Tx_Data,
   input logic TxEN,
+  input logic[127:0][7:0] Tx_DataArray,
   input logic Tx_Enable,
   input logic Tx_AbortedTrans,
   input logic Tx_WriteFCS,
@@ -55,11 +58,11 @@ module assertions_hdlc (
     !Tx ##1 Tx [*6] ##1 !Tx;
   endsequence
 
-  sequence seq_tx;    
+  sequence seq_tx;
    !Tx and $past(Tx) and $past(Tx,2) and $past(Tx,3) and $past(Tx,4) and $past(Tx,5);
   endsequence
 
-  sequence seq_rx;    
+  sequence seq_rx;
    !Rx and $past(Rx) and $past(Rx,2) and $past(Rx,3) and $past(Rx,4) and $past(Rx,5);
   endsequence
 
@@ -95,8 +98,59 @@ module assertions_hdlc (
     @(posedge Clk) $rose(Rx_FrameError) |-> DataOut==8'b00000000;
   endproperty
 
+  property Verify1; //Correct data in RX buffer according to RX input
+    logic[127*10:0] Rx_Store;
+    logic[127:0][7:0] Rx_DataArray;
+    int i = 0;
+    int j = 0;
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_ValidFrame) ##7 (##0 (Rx_ValidFrame, Rx_Store[i] = $past(RxD,7), i++) [*2:10] ##0 (Rx_WrBuff, Rx_DataArray[j] = Rx_Data,j++))[*1:$] ##3 ($fell(Rx_ValidFrame)) |-> ##3 in_out_equal_rx(Rx_DataArray, Rx_Store, Rx_FrameSize);
+  endproperty
+
+function bit in_out_equal_rx(logic [127:0][7:0]Rx_Data, logic [127*10:0]Rx, int size);
+	automatic int seq = 0;
+	automatic int rx_cnt = 0;
+	automatic bit zero_detected = 0;
+	automatic bit pass = 1;
+    automatic int unroll_count = 0;
+    automatic int size_byte = 0;
+	automatic logic [(128*8)-1:0]Rx_Data_Unrolled  = 0;
+    //0 til framesize ytterst, inni fra 0 til 7
+    for(int i = 0; i < size; i++) begin
+        for(int j = 0; j < 8; j++) begin
+            Rx_Data_Unrolled[unroll_count] = Rx_Data[i][j];
+            unroll_count += 1;
+        end
+    end
+    size_byte = size*8;
+	for(int i = 0; i < (size_byte); i++) begin
+		if(Rx_Data_Unrolled[rx_cnt] == 1) begin
+			seq += 1;
+		end else begin
+			seq = 0;
+		end
+		if(zero_detected == 1) begin
+			pass &= (Rx[i] == 0);
+//            $display("Pass: %b, Rx[i]: %b, i: %d",pass,Rx[i],i);
+            zero_detected = 0;
+            size_byte++;
+            seq = 0;
+		end else begin
+//            $display("Pass: %b, Rx_Data_Unrolled[rx_cnt]: %b, Rx[i]: %b, i: %d",pass,Rx_Data_Unrolled[rx_cnt],Rx[i],i);
+			pass &= (Rx[i] == Rx_Data_Unrolled[rx_cnt]);
+			rx_cnt += 1;
+		end
+		if(seq == 5) begin
+			zero_detected = 1;
+		end
+	end
+//    $display("1: %b", Rx[511:0]);
+//    $display("2: %b", Rx_Data_Unrolled[511:0]);
+//    $display("Size: %d", size_byte);
+	return pass;
+endfunction;
+
   property Verify3; //Correct bits set in Rx status/control-register after receiving frame
-    @(posedge Clk) disable iff (!Rst) $rose(Rx_EoF) |-> 
+    @(posedge Clk) disable iff (!Rst) $rose(Rx_EoF) |->
     if(Rx_AbortSignal)
         (##0 !Rx_Overflow ##0 Rx_AbortSignal ##0 !Rx_FrameError ##0 !Rx_Ready, $display("Aborted frame at: ",$time))
     else if (Rx_Overflow)
@@ -107,19 +161,29 @@ module assertions_hdlc (
         ##0 !Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 Rx_Ready;
   endproperty
 
+  property Verify4; //Tx output is correct based on Tx_buffer
+    logic[127*10:0] Tx_Store;
+    logic[127:0][7:0] Tx_DataArray_Log;
+    int i = 0;
+    @(posedge Clk) disable iff (!Rst) ($rose(Tx_ValidFrame), Tx_DataArray_Log = Tx_DataArray) ##10 (##0 (Tx_ValidFrame, Tx_Store[i] = Tx, i++))[*1:$] ##1 ($fell(Tx_ValidFrame)/*,$display("Tx: %b, Tx_DataArray: %b",Tx_Store,Tx_DataArray_Log)*/) |-> in_out_equal_tx(Tx_DataArray_Log, Tx_Store, Tx_FrameSize);
+  endproperty
+
 
   property Verify5; //Start and end frame generation, 01111110
     @(posedge Clk) disable iff (!Rst) !$stable(Tx_ValidFrame) ##0 $past(!Tx_AbortFrame,2)|-> ##[0:2] startendframe;
   endproperty
 
-
   property Verify6_insert; //Zero insert
-    @(posedge Clk) disable iff (!Rst) seq_tx ##0 $past(!Tx_WriteFCS,5) ##0 ($past(Tx_NewByte,5) or $past(Tx_NewByte,6) or $past(Tx_NewByte,7))|-> ($past(Tx_Data,0)==?8'bxx111111 or $past(Tx_Data,0)==?8'bx111111x or $past(Tx_Data,0)==?8'b111111xx);
+    @(posedge Clk) disable iff (!Rst || !Tx_ValidFrame ) Tx_NewByte ##1 (Tx_Data==?8'bxx111111 or Tx_Data==?8'bx111111x or Tx_Data==?8'b111111xx or (Tx_Data==?8'b1xxxxxxx ##1 Tx_Data==?8'bxxx11111) or
+    (Tx_Data==?8'b11xxxxxx ##1 Tx_Data==?8'bxxxx1111) or (Tx_Data==?8'b111xxxxx ##1 Tx_Data==?8'bxxxxx111) or (Tx_Data==?8'b1111xxxx ##1 Tx_Data==?8'bxxxxxx11) or (Tx_Data==?8'b11111xxx ##1 Tx_Data==?8'bxxxxxxx1))
+    ##[24:35] Tx[*5] |=> !Tx;
   endproperty
 
-
   property Verify6_remove; //Zero removal
-    @(posedge Clk) disable iff (!Rst) seq_rx |-> Rx_Data==?8'bxx111111 or Rx_Data==?8'bx111111x or Rx_Data==?8'b111111x;
+    logic a;
+    reg [7:0] data_RX;
+    @(posedge Clk) disable iff (!Rst|| !Tx_ValidFrame) (($rose(Rx) ##1 Rx[*4] ##1 !Rx ##1 (Rx==?1 or Rx==?0)), a = Rx) |->  ##13 (Rx_Data==?{2'bxx, a, 5'b11111} or Rx_Data==?{1'bx, a, 6'b11111x} or Rx_Data==?{a, 7'b11111xx} or (Rx_Data==?8'b1xxxxxxx ##8 Rx_Data==?{3'bxxx, a, 4'b1111}) or
+     (Rx_Data==?8'b11xxxxxx ##8 Rx_Data==?{4'bxxxx, a, 3'b111}) or (Rx_Data==?8'b111xxxxx ##8 Rx_Data==?{5'bxxxxx, a, 2'b11}) or (Rx_Data==?8'b1111xxxx ##8 Rx_Data==?{6'bxxxxxx, a, 1'b1}) or (Rx_Data==?8'b11111xxx ##8 Rx_Data==?{7'bxxxxxxx, a}));
   endproperty
 
   property Verify7; //Idle pattern generation, 11111111
@@ -128,12 +192,12 @@ module assertions_hdlc (
         if($fell(Tx_FCSDone))
             ##8 Tx[*8]
         else
-            $past(Tx) ##0 Tx[*7];  
+            $past(Tx) ##0 Tx[*7];
   endproperty
 
   property Verify8; //Abort signal generated correctly and checked by Rx
     @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) |=>  ##3 abort ##3 $rose(Rx_AbortSignal);
-  endproperty 
+  endproperty
 
   property verify9; //Aborting frame during transmission asserts Tx_AbortedTrans
     @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) ##0 Tx_DataAvail |-> Tx_AbortedTrans;
@@ -142,6 +206,53 @@ module assertions_hdlc (
   property verify10; //Abort pattern detected and Rx_AbortSignal generated properly
     @(posedge Clk) disable iff (!Rst) $stable(Rx_ValidFrame) ##0 $rose(Rx_AbortSignal) |-> prev_abort;
   endproperty
+
+  property verify11;
+    @(posedge Clk) disable iff (!Rst) 
+  endproperty
+
+  function automatic logic checkCRC([127:0] [7:0] arrayA, int size, logic FCSen);
+    automatic logic noError = 1'b1;
+    logic [15:0] tempCRC;
+    logic [23:0] tempStore;
+//    $display("InArray =%h", arrayA[10:0]);
+//    $display("Framesize =%d", size);
+
+	tempCRC = {arrayA[size-1],arrayA[size-2]};
+	arrayA[size-1] = '0;
+	arrayA[size-2] = '0;
+
+    tempStore[7:0]  = arrayA[0];
+    tempStore[15:8] = arrayA[1];
+
+    for (int i = 2; i < size; i++) begin
+      tempStore[23:16] = arrayA[i];
+      for (int j = 0; j < 8; j++) begin
+        tempStore[16] = tempStore[16] ^ tempStore[0];
+        tempStore[14] = tempStore[14] ^ tempStore[0];
+        tempStore[1]  = tempStore[1]  ^ tempStore[0];
+        tempStore[0]  = tempStore[0]  ^ tempStore[0];
+        tempStore = tempStore >> 1;
+      end
+    end
+//    $display("time = %t", $time);
+
+
+//    $display("tempCRC =%h", tempCRC);
+//    $display("calcCRC =%h", tempStore[15:0]);
+
+   if (FCSen) begin
+//    $display("Return =%b", tempCRC == tempStore[15:0]);
+
+   	 return (tempCRC == tempStore[15:0]);
+
+     end else begin
+//    $display("Return force = 1");
+
+   	  return 1'b1;
+    end
+  endfunction
+
 
   property verify12; //Check that Rx_EoF is generated when a whole frame has been received
     @(posedge Clk) disable iff (!Rst) $rose(Rx_FlagDetect) ##8 $rose(Rx_ValidFrame) ##[1:$] $fell(Rx_ValidFrame) |-> !Rx_EoF ##1 Rx_EoF ##1 !Rx_EoF;
@@ -158,11 +269,7 @@ module assertions_hdlc (
 
   property verify15; //Rx_Ready should indicate bytes in RX buffer are ready to be read
     @(posedge Clk) disable iff (!Rst) $rose(Rx_Ready) ##1 Rx_Ready |-> $fell(Rx_EoF);
-  endproperty  
-
-  property verify15; //Rx_Ready should indicate bytes in RX buffer are ready to be read
-    @(posedge Clk) disable iff (!Rst) $rose(Rx_Ready) ##1 Rx_Ready |-> $fell(Rx_EoF);
-  endproperty  
+  endproperty
 
   property verify17; //Tx_Done should be asserted when the entire TX buffer has been read for transmission
     @(posedge Clk) disable iff (!Rst) $fell(Tx_DataAvail) |-> $past(Tx_Done, 1);
@@ -171,6 +278,48 @@ module assertions_hdlc (
   property verify18; //Tx_Full should be asserted after writing 126 or more bytes to Tx buffer
     @(posedge Clk) disable iff (!Rst) $rose(Tx_Enable) ##2 Tx_FrameSize == 8'd126 |-> $past(Tx_Full, 2);
   endproperty
+
+function bit in_out_equal_tx(logic [127:0][7:0]Tx_Data, logic [127*10:0]Tx, int size);
+	automatic int seq = 0;
+	automatic int tx_cnt = 0;
+	automatic bit zero_detected = 0;
+	automatic bit pass = 1;
+    automatic int unroll_count = 0;
+	automatic logic [(128*8)-1:0]Tx_Data_Unrolled  = 0;
+    //0 til framesize ytterst, inni fra 0 til 7
+    for(int i = 0; i < size; i++) begin
+        for(int j = 0; j < 8; j++) begin
+            Tx_Data_Unrolled[unroll_count] = Tx_Data[i][j];
+            unroll_count += 1;
+        end
+    end
+    size=size*8;
+	for(int i = 0; i < size; i++) begin
+		if(Tx[i] == 1) begin
+			seq += 1;
+		end else begin
+			seq = 0;
+		end
+		if(zero_detected == 1) begin
+			pass &= (Tx[i] == 0);
+            zero_detected = 0;
+            size++;
+            //$display("Pass: %b, Tx[i]: %b, i: %d",pass,Tx[i],i);
+		end else begin
+			pass &= (Tx[i] == Tx_Data_Unrolled[tx_cnt]);
+			tx_cnt += 1;
+            //$display("Pass: %b, Tx_Data_Unrolled[tx_cnt]: %b, Tx[i]: %b, i: %d",pass,Tx_Data_Unrolled[tx_cnt],Tx[i],i);
+		end
+		if(seq == 5) begin
+			zero_detected = 1;
+            seq = 0;
+		end
+	end
+//    $display("1: %b", Tx[255:0]);
+//    $display("2: %b", Tx_Data_Unrolled[255:0]);
+	return pass;
+endfunction;
+
 
 
 
@@ -186,14 +335,22 @@ correct_data_rxBuff_Abort_Assert    :  assert property (correct_data_rxBuff_Abor
                                   else begin $error("Wrong data in rx buffer after Abort");
 ErrCntAssertions++; end
 
+Verify1_assert: 	assert property (Verify1)  $display("PASS: Rx out is correct based on Rx_Buffer");
+				                else begin $error("Fail: Rx doesn't match Rx_buffer");
+ErrCntAssertions++; end
+
 Verify3_assert: 	assert property (Verify3)  $display("PASS: RX status OK");
 				                else begin $error("Fail: RX status not OK after transfer");
+ErrCntAssertions++; end
+
+Verify4_assert: 	assert property (Verify4)  $display("PASS: Tx out is correct based on Tx_Buffer");
+				                else begin $error("Fail: Tx doesn't match Tx_buffer");
 ErrCntAssertions++; end
 
 Verify5_assert: 	assert property (Verify5) $display("PASS: Start and end frame inserted properly");
 				                else begin $error("Startend frames not inserted");
 ErrCntAssertions++; end
-/*
+
 Verify6_Insert_Assert: 	assert property (Verify6_insert) $display("PASS: inserted 0 after 5 consecutive ones");
 				                else begin $error("No 0 inserted after 5 consecutive ones");
 ErrCntAssertions++; end
@@ -201,7 +358,7 @@ ErrCntAssertions++; end
 Verify6_Remove_Assert: 	assert property (Verify6_remove) $display("PASS: removed 0 after 5 consecutive ones");
 				                else begin $error("No 0 removed after 5 consecutive ones");
 ErrCntAssertions++; end
-*/
+
 Verify7_assert: 	assert property (Verify7) /*$display("PASS: Idle pattern generated properly");*/
 				                else begin $error("Idle pattern incorrectly generated");
 ErrCntAssertions++; end
