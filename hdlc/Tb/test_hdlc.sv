@@ -36,6 +36,7 @@ module test_hdlc ();
   assign uin_hdlc.Tx_FCSDone       = u_dut.Tx_FCSDone;
   assign uin_hdlc.Tx_DataArray      = u_dut.Tx_DataArray;
   assign uin_hdlc.RxD               = u_dut.RxD;
+  assign uin_hdlc.Rx_FCSen          = u_dut.Rx_FCSen;
   //Clock
   always #250ns uin_hdlc.Clk = ~uin_hdlc.Clk;
 

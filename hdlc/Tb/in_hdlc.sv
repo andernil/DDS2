@@ -47,6 +47,7 @@ interface in_hdlc ();
   logic       Rx_StartFCS;
   logic       Rx_Drop;
   logic       Rx_RdBuff;
+  logic       Rx_FCSen;
   logic       Rx_WrBuff;
   logic       Rx_AbortSignal;
   logic       Rx_NewByte;
