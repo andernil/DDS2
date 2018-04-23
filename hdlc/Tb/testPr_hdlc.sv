@@ -93,10 +93,33 @@ program testPr_hdlc(
 covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
    //
    //
-   		coverpoint uin_hdlc.DataIn {
+   		dataIn: coverpoint uin_hdlc.DataIn {
    			option.auto_bin_max = 256;
    		}
-   //
+        Framesize: coverpoint uin_hdlc.Tx_FrameSize {
+            option.auto_bin_max = 128;
+            bins FrameSize_OverFlow = {128,255};
+        }
+        Tx_AbortedTrans: coverpoint uin_hdlc.Tx_AbortedTrans {
+            bins tx_not_aborted = {0};
+            bins tx_aborted = {1};
+        }
+        Tx_Done: coverpoint uin_hdlc.Tx_Done {
+            bins tx_not_done = {0};
+            bins tx_done = {1};
+        }
+        Rx_Overflow: coverpoint uin_hdlc.Rx_Overflow {
+            bins rx_no_overflow = {0};
+            bins rx_overflow = {1};
+        }
+        Rx_AbortSignal: coverpoint uin_hdlc.Rx_AbortSignal {
+            bins rx_not_aborted = {0};
+            bins rx_aborted = {1};
+        }
+        Rx_FrameError: coverpoint uin_hdlc.Rx_FrameError {
+            bins rx_no_frameerror = {0};
+            bins rx_frameerror = {1};
+        }
    // 		coverpoint data_out {
    // 			bins Zero = {0};
    // 			bins Small = {[1:50]};
