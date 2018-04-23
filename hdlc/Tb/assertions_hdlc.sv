@@ -153,7 +153,7 @@ endfunction;
   property Verify3; //Correct bits set in Rx status/control-register after receiving frame
     @(posedge Clk) disable iff (!Rst) $rose(Rx_EoF) |->
     if(Rx_AbortSignal)
-        (##0 !Rx_Overflow ##0 Rx_AbortSignal ##0 !Rx_FrameError ##0 !Rx_Ready, $display("Aborted frame at: ",$time))
+        (##0 !Rx_Overflow ##0 Rx_AbortSignal ##0 !Rx_FrameError ##1 !Rx_Ready, $display("Aborted frame at: ",$time))
     else if (Rx_Overflow)
         (##0 Rx_Overflow ##0 !Rx_AbortSignal ##0 !Rx_FrameError ##0 Rx_Ready, $display("Overflow at: ",$time))
     else if (Rx_FrameError)
@@ -166,7 +166,7 @@ endfunction;
     logic[127*10:0] Tx_Store;
     logic[127:0][7:0] Tx_DataArray_Log;
     int i = 0;
-    @(posedge Clk) disable iff (!Rst) ($rose(Tx_ValidFrame), Tx_DataArray_Log = Tx_DataArray) ##10 (##0 (Tx_ValidFrame, Tx_Store[i] = Tx, i++))[*1:$] ##1 ($fell(Tx_ValidFrame)) |-> in_out_equal_tx(Tx_DataArray_Log, Tx_Store, Tx_FrameSize);
+    @(posedge Clk) disable iff (!Rst || Tx_AbortedTrans) ($rose(Tx_ValidFrame), Tx_DataArray_Log = Tx_DataArray) ##10 (##0 (Tx_ValidFrame, Tx_Store[i] = Tx, i++))[*1:$] ##1 ($fell(Tx_ValidFrame)) |-> in_out_equal_tx(Tx_DataArray_Log, Tx_Store, Tx_FrameSize);
   endproperty
 
 //Function to check if Tx_DataArray and Tx is correct in regards to transfer and zero insertion
@@ -239,11 +239,11 @@ endfunction;
   endproperty
 
   property Verify8; //Abort signal generated correctly and checked by Rx
-    @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) |=>  ##3 abort ##3 $rose(Rx_AbortSignal);
+    @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) ##0 Tx_ValidFrame |=>  ##3 abort ##3 $rose(Rx_AbortSignal);
   endproperty
 
   property verify9; //Aborting frame during transmission asserts Tx_AbortedTrans
-    @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) ##0 Tx_DataAvail |-> Tx_AbortedTrans;
+    @(posedge Clk) disable iff (!Rst) $rose(Tx_AbortFrame) ##0 Tx_DataAvail |=> ##1 $rose(Tx_AbortedTrans);
   endproperty
 
   property verify10; //Abort pattern detected and Rx_AbortSignal generated properly
