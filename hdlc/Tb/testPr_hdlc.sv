@@ -39,7 +39,7 @@ program testPr_hdlc(
   parameter FLAG  = 8'b0111_1110;
   parameter ABORT = 8'b0111_1111;
 
-  int num_loops = 1000;       //Number of times the random test should loop
+  int num_loops = 10;       //Number of times the random test should loop
     
 
 
@@ -89,6 +89,35 @@ program testPr_hdlc(
     uin_hdlc.Rst         =   1'b1;
   endtask
 
+//Cover
+covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
+   //
+   //
+   		coverpoint uin_hdlc.DataIn {
+   			option.auto_bin_max = 256;
+   		}
+   //
+   // 		coverpoint data_out {
+   // 			bins Zero = {0};
+   // 			bins Small = {[1:50]};
+   // 			bins Hunds = {[100:200]};
+   // 			bins Large = {[200:$]};
+   // 			bins others[] = default;
+   // 		}
+   // 		A: coverpoint data_in;
+   // 		B: coverpoint b;
+   // 		AB: cross A, B;
+    	endgroup
+   //
+   // //Initialize your covergroup here
+        hdlc_cg hdlc_cg_inst = new();
+   //
+   // //Sample covergroup here
+ //   	always @(negedge uin_hdlc.Clk) begin
+  //  		hdlc_cg_inst.sample();
+   //     end
+//endgroup
+
   task WriteAddress(input logic [2:0] Address ,input logic [7:0] Data);
     @(posedge uin_hdlc.Clk);
     uin_hdlc.Address     = Address;
@@ -111,6 +140,7 @@ program testPr_hdlc(
   endtask
 
   task random_loop();
+
     for(int i = 0; i < num_loops; i=i+1) begin
         random_input();
     end
@@ -275,6 +305,7 @@ program testPr_hdlc(
     for (int i = 0; i < size; i++) begin
         Data = $urandom();
         WriteAddress(TX_BUFF, Data);
+        hdlc_cg_inst.sample();
     end
     $display("%d bytes of data written to TX_BUFF", size);
     //Initiate transfer
