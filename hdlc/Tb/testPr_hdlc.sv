@@ -40,7 +40,7 @@ program testPr_hdlc(
   parameter ABORT = 8'b0111_1111;
 
   int num_loops = 3000;       //Number of times the random test should loop
-    
+
 
 
   initial begin
@@ -50,13 +50,11 @@ program testPr_hdlc(
 
     init();
     //Tests:
-    //Verification17();
-    //Verification9();
-    //Verification6();
-    //Verification8();
+    Verification1_Drop();
     random_loop();
     Rx_Random();
     random_input();
+    Verification8();
     $display("*************************************************************");
     $display("%t - Finishing Test Program", $time);
     $display("*************************************************************");
@@ -164,7 +162,9 @@ covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
     transmitData = 8'b0000010;
     receiveData = 8'b0000010;
     for(int i = 0; i < 1; i=i+1) begin
-      WriteAddress(TX_BUFF, 255);                  //Write the data to register 1
+      WriteAddress(TX_BUFF, 'h00);                  //Write the data to register 1
+      WriteAddress(TX_BUFF, 'h71);                  //Write the data to register 1
+      WriteAddress(TX_BUFF, 'h9b);                  //Hvis checksummen har 5 enere setter Tx inn en 0, men Rx fjerner den ikke, så det blir non-aligned data og FrameError hos Rx.
 		end
     WriteAddress(TX_SC, transmitData);         //Start transfer
     for(int i = 0; i < 2500; i=i+1) begin
@@ -188,15 +188,15 @@ covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
     automatic logic[7:0] Data = '0;
     logic [7:0] size;
 
-    size = $urandom_range(0, 129); 
+    size = $urandom_range(0, 129);
     //Generate random data and write it to TX_buffer
     for (int i = 0; i < size; i++) begin
         Data = $urandom();
         WriteAddress(TX_BUFF, Data);
     end
-    $display("%d bytes of data written to TX_BUFF", size);
+    // $display("%d bytes of data written to TX_BUFF", size);
     //Initiate transfer
-    WriteAddress(TX_SC, TX_ENABLE);  
+    WriteAddress(TX_SC, TX_ENABLE);
     for(int i = 0; i < 2200; i=i+1) begin
         Data = $urandom();
         if(i==1000 && Data==127) begin
@@ -254,8 +254,8 @@ covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
     end
   endtask
 
-  task CalculateFCS(input  logic [127:0][7:0]  data, 
-                    input  logic [7:0]         size, 
+  task CalculateFCS(input  logic [127:0][7:0]  data,
+                    input  logic [7:0]         size,
                     output logic [15:0]        FCSbytes );
 
     logic [23:0] tempStore;
@@ -274,5 +274,169 @@ covergroup hdlc_cg () @(posedge uin_hdlc.Clk);
     end
     FCSbytes = tempStore[15:0];
   endtask
+
+  task Verification1_Drop();
+
+
+  logic [7:0] readData;
+  logic [7:0] writeData;
+
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+
+
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b1;
+@(posedge uin_hdlc.Clk);
+uin_hdlc.Rx = 1'b0;
+@(posedge uin_hdlc.Clk);
+
+//ABORT FRAME
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b1;
+// @(posedge uin_hdlc.Clk);
+// uin_hdlc.Rx = 1'b0;
+// @(posedge uin_hdlc.Clk);
+
+
+writeData = 8'b00000000;
+WriteAddress(3'b010, writeData);
+ReadAddress(3'b010, readData);
+$display("Rx_SC=%b", readData);
+@(posedge uin_hdlc.Clk);
+@(posedge uin_hdlc.Clk);
+@(posedge uin_hdlc.Clk);
+@(posedge uin_hdlc.Clk);
+@(posedge uin_hdlc.Clk);
+@(posedge uin_hdlc.Clk);
+
+
+uin_hdlc.Address     = 3'b010;
+uin_hdlc.WriteEnable = 1'b1;
+uin_hdlc.DataIn      = 8'b00000010;
+@(posedge uin_hdlc.Clk);
+ReadAddress(3'b011, readData);
+$display("Rx_Data=%b", readData);
+endtask
 
 endprogram
